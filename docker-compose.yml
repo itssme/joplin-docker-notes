@@ -23,7 +23,7 @@ services:
         restart: unless-stopped
         environment:
             - APP_PORT=22300
-            - APP_BASE_URL=http://www.example.com:8080  # don't forget the custom port for Joplin
+            - APP_BASE_URL=https://www.example.com:8080  # don't forget the custom port for Joplin
             - DB_CLIENT=pg
             - POSTGRES_PASSWORD=password
             - POSTGRES_DATABASE=joplin
