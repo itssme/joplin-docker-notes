@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+    db:
+        container_name: db
+        image: postgres:15
+        volumes:
+            - /docker/joplindb:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        restart: unless-stopped
+        environment:
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=joplin
+    joplin:
+        container_name: joplin
+        image: joplin/server:latest
+        depends_on:
+            - db
+        ports:
+            - "22300:22300"
+        restart: unless-stopped
+        environment:
+            - APP_PORT=22300
+            - APP_BASE_URL=http://www.example.com:8080  # don't forget the custom port for Joplin
+            - DB_CLIENT=pg
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DATABASE=joplin
+            - POSTGRES_USER=postgres
+            - POSTGRES_PORT=5432
+            - POSTGRES_HOST=db
+            - MAILER_ENABLED=0
+    haproxy:
+        container_name: lb
+        environment:
+            - CERT1=example.com, www.example.com
+            - EMAIL=your@email.com
+            - STAGING=false
+        volumes:
+            - './letsencrypt:/etc/letsencrypt'
+            - './haproxy.cfg:/etc/haproxy/haproxy.cfg'
+        ports:
+            - '80:80'
+            - '443:443'
+            - '8080:8080' # Custom port for Joplin
+        image: 'ghcr.io/tomdess/docker-haproxy-certbot:master'
+    nginx:
+        container_name: www
+        image: nginx
+
+volumes:
+  joplindb:
